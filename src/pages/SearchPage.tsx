@@ -1,0 +1,1 @@
+export const SearchPage = () => <div>Popcorn 🍿 — Главная страница (Поиск)</div>;
