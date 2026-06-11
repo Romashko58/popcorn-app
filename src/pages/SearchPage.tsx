@@ -1,1 +1,1 @@
-export const SearchPage = () => <div>Popcorn 🍿 — Главная страница (Поиск)</div>;
+export const SearchPage = () => <div>Главная страница (Поиск)</div>;
