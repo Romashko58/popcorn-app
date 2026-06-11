@@ -1,1 +1,1 @@
-export const FavoritesPage = () => <div>Popcorn 🍿 — Страница Избранное</div>;
+export const FavoritesPage = () => <div>Страница Избранное</div>;
