@@ -1,11 +1,13 @@
-import { useState } from 'react';
+
 import { Outlet, NavLink } from 'react-router-dom';
 import styles from './App.module.css';
 import { MdSearch, MdFavorite, MdWbSunny, MdNightsStay } from 'react-icons/md';
+import { useAppDispatch, useAppSelector } from './hooks/storeHooks';
+import { toggleTheme } from './store/settingsSlice';
 
 export const MainLayout = () => {
-   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+   const dispatch = useAppDispatch();
+   const theme = useAppSelector((state) => state.settings.theme);
    const themeClass = theme === 'dark' ? styles.themeDark : styles.themeLight;
 
    return (
@@ -23,7 +25,7 @@ export const MainLayout = () => {
                className={`${styles.searchBar} appTransition`}
             />
 
-            <button onClick={toggleTheme} className={styles.themeToggle} title="Change the site theme">
+            <button onClick={() => dispatch(toggleTheme())} className={styles.themeToggle} >
                {theme === 'dark' ? (
                   <MdWbSunny style={{ color: '#ffb703' }} />
                ) : (
