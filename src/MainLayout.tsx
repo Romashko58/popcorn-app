@@ -4,11 +4,14 @@ import styles from './App.module.css';
 import { MdSearch, MdFavorite, MdWbSunny, MdNightsStay } from 'react-icons/md';
 import { useAppDispatch, useAppSelector } from './hooks/storeHooks';
 import { toggleTheme } from './store/settingsSlice';
+import { setSearchQuery } from './store/searchSlice';
+
 
 export const MainLayout = () => {
    const dispatch = useAppDispatch();
    const theme = useAppSelector((state) => state.settings.theme);
    const themeClass = theme === 'dark' ? styles.themeDark : styles.themeLight;
+   const searchQuery = useAppSelector((state) => state.search.query);
 
    return (
       <div className={`${styles.appWrapper} ${themeClass} appTransition`}>
@@ -23,6 +26,8 @@ export const MainLayout = () => {
                type="text"
                placeholder="Search..."
                className={`${styles.searchBar} appTransition`}
+               value={searchQuery}
+               onChange={(e) => dispatch(setSearchQuery(e.target.value))}
             />
 
             <button onClick={() => dispatch(toggleTheme())} className={styles.themeToggle} >

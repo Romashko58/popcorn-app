@@ -1,0 +1,78 @@
+.card {
+   background-color: #1e1e1e;
+   border-radius: 12px;
+   overflow: hidden;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+   display: flex;
+   flex-direction: column;
+}
+
+.posterWrapper {
+   position: relative;
+   aspect-ratio: 2 / 3;
+   width: 100%;
+}
+
+.poster {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+}
+
+.badge {
+   position: absolute;
+   top: 10px;
+   left: 10px;
+   background: rgba(0, 0, 0, 0.75);
+   color: #ffffff;
+   padding: 4px 8px;
+   font-size: 11px;
+   border-radius: 4px;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+}
+
+.favoriteBtn {
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   background: rgba(0, 0, 0, 0.5);
+   border: none;
+   border-radius: 50%;
+   width: 36px;
+   height: 36px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: #ffffff;
+   cursor: pointer;
+   transition: background 0.2s, transform 0.1s;
+}
+
+.favoriteBtn:hover {
+   background: #e50914;
+   transform: scale(1.05);
+}
+
+.info {
+   padding: 14px;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+   flex-grow: 1;
+}
+
+.title {
+   margin: 0;
+   font-size: 15px;
+   font-weight: 600;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   color: #ffffff;
+}
+
+.year {
+   font-size: 13px;
+   color: #8e8e93;
+}

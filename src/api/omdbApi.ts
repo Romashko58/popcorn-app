@@ -15,11 +15,13 @@ export const omdbApi = createApi({
       }),
 
 
-      getMovieDetails: builder.query<MovieDetail, string>({
-         query: (id) => `?apikey=${API_KEY}&i=${id}&plot=full`,
+      getMovieById: builder.query<MovieDetail, { id: string; plot?: 'short' | 'full' }>({
+         query: ({ id, plot = 'short' }) => `?apikey=${API_KEY}&i=${id}&plot=${plot}`,
+
+
       }),
    }),
 });
 
 
-export const { useSearchMoviesQuery, useGetMovieDetailsQuery } = omdbApi;
+export const { useSearchMoviesQuery, useGetMovieByIdQuery } = omdbApi;
