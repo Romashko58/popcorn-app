@@ -10,10 +10,15 @@ export const omdbApi = createApi({
    endpoints: (builder) => ({
 
 
-      searchMovies: builder.query<OMDbSearchResponse, { title: string; page: number }>({
-         query: ({ title, page }) => `?apikey=${API_KEY}&s=${title}&page=${page}`,
+      searchMovies: builder.query<OMDbSearchResponse, { title: string; page: number; type?: string; year?: string }>({
+         query: ({ title, page, type, year }) => {
+            let url = `?apikey=${API_KEY}&s=${title}&page=${page}`
+            if (type) url += `&type=${type}`;
+            if (year) url += `&y=${year}`;
+            return url;
+         },
          serializeQueryArgs: ({ endpointName, queryArgs }) => {
-            return `${endpointName}_${queryArgs.title}`;
+            return `${endpointName}_${queryArgs.title}_${queryArgs.type || ''}_${queryArgs.year || ''}`;
          },
 
          merge: (currentCache, newItems, { arg }) => {
@@ -28,7 +33,9 @@ export const omdbApi = createApi({
          forceRefetch({ currentArg, previousArg }) {
             return (
                currentArg?.title !== previousArg?.title ||
-               currentArg?.page !== previousArg?.page
+               currentArg?.page !== previousArg?.page ||
+               currentArg?.type !== previousArg?.type ||
+               currentArg?.year !== previousArg?.year
             );
          },
       }),

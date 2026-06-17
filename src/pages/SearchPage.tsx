@@ -1,11 +1,13 @@
-import { useAppSelector } from '../hooks/storeHooks';
+import { useAppDispatch, useAppSelector } from '../hooks/storeHooks';
 import { useSearchMoviesQuery } from '../api/omdbApi';
 import { MovieCard } from '../components/MovieCard';
 import styles from './SearchPage.module.css';
 import { useEffect, useState } from 'react';
+import { resetFilters, setMovieType, setMovieYear, type MovieType } from '../store/searchSlice';
 
 export const SearchPage = () => {
-   const searchQuery = useAppSelector((state) => state.search.query);
+   const dispatch = useAppDispatch();
+   const { query: searchQuery, type: movieType, year: movieYear } = useAppSelector((state) => state.search);
    const isSearching = searchQuery.trim() !== '';
 
    const currentSearch = isSearching ? searchQuery : 'series';
@@ -14,12 +16,14 @@ export const SearchPage = () => {
 
    useEffect(() => {
       setPage(1);
-   }, [currentSearch]);
+   }, [currentSearch, movieType, movieYear]);
 
 
    const { data, isLoading, isError, isFetching } = useSearchMoviesQuery({
       title: currentSearch,
-      page
+      page,
+      type: movieType,
+      year: movieYear,
    });
    console.log("Текущее состояние страницы:", page, "Идет ли загрузка (isFetching):", isFetching);
    if (isLoading && page === 1) {
@@ -45,6 +49,51 @@ export const SearchPage = () => {
 
    return (
       <div className={styles.container}>
+
+         <div className={styles.filterWrapper}>
+            <div className={styles.filterGroup}>
+               <label htmlFor="type-select">Type:</label>
+               <select
+                  id="type-select"
+                  value={movieType}
+                  onChange={(e) => dispatch(setMovieType(e.target.value as MovieType))}
+                  className={styles.filterSelect}
+               >
+                  <option value="">All Types</option>
+                  <option value="movie">Movies</option>
+                  <option value="series">Series</option>
+                  <option value="game">Games</option>
+               </select>
+            </div>
+
+            <div className={styles.filterGroup}>
+               <label htmlFor="year-input">Year:</label>
+               <input
+                  id="year-input"
+                  type="text"
+                  placeholder="e.g. 2024"
+                  maxLength={4}
+                  value={movieYear}
+                  onChange={(e) => {
+                     const val = e.target.value.replace(/\D/g, '');
+                     dispatch(setMovieYear(val));
+                  }}
+                  className={styles.filterInput}
+               />
+            </div>
+
+            {(movieType || movieYear) && (
+               <button
+                  className={styles.resetBtn}
+                  onClick={() => {
+                     dispatch(resetFilters());
+                  }}
+               >
+                  Reset
+               </button>
+            )}
+         </div>
+
          <h2 className={styles.pageTitle}>
             {!isSearching ? 'Explore Movies' : `Search results for: "${searchQuery}"`}
          </h2>
