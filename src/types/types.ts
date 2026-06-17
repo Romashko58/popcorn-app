@@ -11,7 +11,6 @@ export interface OMDbSearchResponse {
    totalResults?: string;
    Response: 'True' | 'False';
    Error?: string;
-   page?: number
 }
 
 export interface MovieDetail {

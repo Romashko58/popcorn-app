@@ -10,8 +10,27 @@ export const omdbApi = createApi({
    endpoints: (builder) => ({
 
 
-      searchMovies: builder.query<OMDbSearchResponse, string>({
-         query: (title) => `?apikey=${API_KEY}&s=${title}`,
+      searchMovies: builder.query<OMDbSearchResponse, { title: string; page: number }>({
+         query: ({ title, page }) => `?apikey=${API_KEY}&s=${title}&page=${page}`,
+         serializeQueryArgs: ({ endpointName, queryArgs }) => {
+            return `${endpointName}_${queryArgs.title}`;
+         },
+
+         merge: (currentCache, newItems, { arg }) => {
+            if (arg.page === 1) {
+               return newItems;
+            }
+            if (currentCache.Search && newItems.Search) {
+               currentCache.Search.push(...newItems.Search);
+            }
+         },
+
+         forceRefetch({ currentArg, previousArg }) {
+            return (
+               currentArg?.title !== previousArg?.title ||
+               currentArg?.page !== previousArg?.page
+            );
+         },
       }),
 
 
