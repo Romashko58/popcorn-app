@@ -1,6 +1,7 @@
 
 import { MdFavoriteBorder } from 'react-icons/md';
 import styles from './MovieCard.module.css';
+import { useNavigate } from 'react-router-dom';
 
 interface MovieCardProps {
    title: string;
@@ -10,14 +11,16 @@ interface MovieCardProps {
    type: string;
 }
 
-export const MovieCard = ({ title, year, poster, type }: MovieCardProps) => {
-
+export const MovieCard = ({ title, year, poster, type, imdbID }: MovieCardProps) => {
+   const navigate = useNavigate();
    return (
-      <div className={`${styles.card} appTransition`}>
+      <div className={`${styles.card} appTransition`}
+         onClick={() => navigate(`/movies/${imdbID}`)}
+         style={{ cursor: 'pointer' }}>
          <div className={styles.posterWrapper}>
             <img src={poster} alt={title} className={styles.poster} />
             <span className={styles.badge}>{type}</span>
-            <button className={styles.favoriteBtn} title="Add to favorites">
+            <button className={styles.favoriteBtn} title="Add to favorites" onClick={(e) => e.stopPropagation()}>
                <MdFavoriteBorder size={22} />
             </button>
          </div>
