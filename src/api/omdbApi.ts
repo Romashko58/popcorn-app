@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { MovieDetail, OMDbSearchResponse } from '../types/types';
 
 
-const API_KEY = 'eb5051af';
+const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 export const omdbApi = createApi({
    reducerPath: 'omdbApi',
