@@ -1,15 +1,68 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useGetMovieByIdQuery } from '../api/omdbApi';
-import { MdFavoriteBorder, MdArrowBack, MdStar } from 'react-icons/md';
+import { MdFavoriteBorder, MdFavorite, MdArrowBack, MdStar, MdEdit, MdDelete, MdSave, MdCancel } from 'react-icons/md';
 import styles from './MoviePage.module.css';
+import { useAppDispatch, useAppSelector } from '../hooks/storeHooks';
+import { addToFavorites, removeFromFavorites } from '../store/favoritesSlice';
+import { saveNote, deleteNote } from '../store/notesSlice';
 
 export const MoviePage = () => {
    const { id } = useParams<{ id: string }>();
    const navigate = useNavigate();
+   const dispatch = useAppDispatch();
 
    const { data: movie, error, isLoading } = useGetMovieByIdQuery(
       id ? { id, plot: 'full' } : { id: '' }
    );
+
+   const isFavorite = useAppSelector((state) =>
+      state.favorites.items.some((item) => item.imdbID === id)
+   );
+
+   const savedNote = useAppSelector((state) => state.notes.items[id || ''] || '');
+   const [noteText, setNoteText] = useState('');
+   const [isEditing, setIsEditing] = useState(false);
+
+   useEffect(() => {
+      setNoteText(savedNote);
+      setIsEditing(savedNote === '');
+   }, [savedNote]);
+
+   const handleFavoriteToggle = () => {
+      if (!movie) return;
+
+      if (isFavorite) {
+         dispatch(removeFromFavorites(movie.imdbID));
+      } else {
+         dispatch(addToFavorites({
+            imdbID: movie.imdbID,
+            Title: movie.Title,
+            Year: movie.Year,
+            Poster: movie.Poster,
+            Type: movie.Type
+         }));
+      }
+   };
+
+   const handleSaveNote = () => {
+      if (id) {
+         dispatch(saveNote({ imdbID: id, text: noteText }));
+         setIsEditing(false);
+      }
+   };
+
+   const handleDeleteNote = () => {
+      if (id && window.confirm('Are you sure you want to delete your note?')) {
+         dispatch(deleteNote(id));
+         setNoteText('');
+      }
+   };
+
+   const handleCancelEdit = () => {
+      setNoteText(savedNote);
+      setIsEditing(savedNote === '');
+   };
 
    if (isLoading) {
       return (
@@ -66,8 +119,16 @@ export const MoviePage = () => {
                   <p><strong>Awards:</strong> {movie.Awards}</p>
                </div>
 
-               <button className={styles.favoriteBtn}>
-                  <MdFavoriteBorder size={20} /> Add to Favorites
+               <button className={`${styles.favoriteBtn} ${isFavorite ? styles.activeFav : ''}`} onClick={handleFavoriteToggle}>
+                  {isFavorite ? (
+                     <>
+                        <MdFavorite size={20} color="#ff4d4d" /> Remove from Favorites
+                     </>
+                  ) : (
+                     <>
+                        <MdFavoriteBorder size={20} /> Add to Favorites
+                     </>
+                  )}
                </button>
             </div>
          </div>
@@ -79,16 +140,44 @@ export const MoviePage = () => {
 
          <div className={styles.notesSection}>
             <h3 className={styles.sectionTitle}>Personal Notes & Reviews</h3>
-            <div className={styles.stubForm}>
-               <textarea
-                  placeholder="Write your review or notes about this movie here..."
-                  className={styles.textareaStub}
-                  disabled
-               />
-               <button className={styles.addNoteBtnStub} disabled>
-                  Add Note
-               </button>
-            </div>
+
+            {isEditing ? (
+               <div className={styles.noteForm}>
+                  <textarea
+                     placeholder="Write your review or notes about this movie here..."
+                     className={styles.textarea}
+                     value={noteText}
+                     onChange={(e) => setNoteText(e.target.value)}
+                     maxLength={1000}
+                  />
+                  <div className={styles.btnRow}>
+                     <button
+                        className={styles.saveNoteBtn}
+                        onClick={handleSaveNote}
+                        disabled={!noteText.trim()}
+                     >
+                        <MdSave size={18} /> Save Note
+                     </button>
+                     {savedNote && (
+                        <button className={styles.cancelBtn} onClick={handleCancelEdit}>
+                           <MdCancel size={18} /> Cancel
+                        </button>
+                     )}
+                  </div>
+               </div>
+            ) : (
+               <div className={styles.displayNoteBlock}>
+                  <p className={styles.noteContent}>{savedNote}</p>
+                  <div className={styles.noteActions}>
+                     <button className={styles.actionBtn} onClick={() => setIsEditing(true)} title="Edit note">
+                        <MdEdit size={18} /> Edit
+                     </button>
+                     <button className={`${styles.actionBtn} ${styles.deleteBtnColor}`} onClick={handleDeleteNote} title="Delete note">
+                        <MdDelete size={18} /> Delete
+                     </button>
+                  </div>
+               </div>
+            )}
          </div>
       </div>
    );
