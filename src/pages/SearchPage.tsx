@@ -4,19 +4,22 @@ import { MovieCard } from '../components/MovieCard';
 import styles from './SearchPage.module.css';
 import { useEffect, useState } from 'react';
 import { resetFilters, setMovieType, setMovieYear, type MovieType } from '../store/searchSlice';
+import { useDebounce } from '../hooks/debounce';
+
 
 export const SearchPage = () => {
    const dispatch = useAppDispatch();
    const { query: searchQuery, type: movieType, year: movieYear } = useAppSelector((state) => state.search);
+   const debouncedSearchQuery = useDebounce(searchQuery, 500);
    const isSearching = searchQuery.trim() !== '';
 
-   const currentSearch = isSearching ? searchQuery : 'series';
+   const currentSearch = debouncedSearchQuery.trim() !== '' ? debouncedSearchQuery : 'series';
 
    const [page, setPage] = useState(1);
 
    useEffect(() => {
       setPage(1);
-   }, [currentSearch, movieType, movieYear]);
+   }, [debouncedSearchQuery, movieType, movieYear]);
 
 
    const { data, isLoading, isError, isFetching } = useSearchMoviesQuery({
