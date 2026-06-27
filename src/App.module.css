@@ -127,3 +127,68 @@
 .themeToggle:hover {
    transform: scale(1.1);
 }
+
+/* ==========================================================================
+   АДАПТИВНОСТЬ С АБСОЛЮТНЫМ ПОЗИЦИОНИРОВАНИЕМ ДЛЯ КНОПКИ ТЕМЫ
+   ========================================================================== */
+
+@media (max-width: 768px) {
+   .appWrapper {
+      grid-template-rows: auto auto 1fr;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+         "header"
+         "sidebar"
+         "main";
+   }
+
+   .header {
+      position: relative;
+      /* Делаем хедер базой для позиционирования кнопки темы */
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px 20px;
+      height: auto;
+      align-items: center;
+   }
+
+   /* Логотип останется по центру, как и был */
+   .logo {
+      margin-right: 0;
+   }
+
+   /* Поиск теперь спокойно занимает всю свою строчку без соседей */
+   .searchBar {
+      width: 100%;
+      max-width: 450px;
+      margin: 0;
+   }
+
+   /* Вырываем кнопку темы из общего потока и аккуратно вешаем в правый верхний угол хедера */
+   .themeToggle {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      padding: 6px;
+      margin: 0;
+   }
+
+   /* Сайбар (меню) в аккуратный горизонтальный ряд */
+   .sidebar {
+      flex-direction: row;
+      justify-content: space-around;
+      padding: 10px;
+      gap: 5px;
+      border-bottom: 1px solid rgba(166, 146, 150, 0.15);
+   }
+
+   .navLink {
+      padding: 8px 12px;
+      font-size: 14px;
+      gap: 8px;
+   }
+
+   .mainContent {
+      padding: 20px 15px;
+   }
+}
