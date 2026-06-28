@@ -28,7 +28,6 @@ export const SearchPage = () => {
       type: movieType,
       year: movieYear,
    });
-   console.log("Текущее состояние страницы:", page, "Идет ли загрузка (isFetching):", isFetching);
    if (isLoading && page === 1) {
       return (
          <div className={styles.center}>

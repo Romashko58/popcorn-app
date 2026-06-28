@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useGetMovieByIdQuery } from '../api/omdbApi';
-import { MdFavoriteBorder, MdFavorite, MdArrowBack, MdStar, MdEdit, MdDelete, MdSave, MdCancel } from 'react-icons/md';
+import { MdFavoriteBorder, MdFavorite, MdArrowBack, MdStar, MdDelete, MdEdit } from 'react-icons/md';
 import styles from './MoviePage.module.css';
 import { useAppDispatch, useAppSelector } from '../hooks/storeHooks';
 import { addToFavorites, removeFromFavorites } from '../store/favoritesSlice';
-import { saveNote, deleteNote } from '../store/notesSlice';
+import { saveNote, deleteNote, updateNote } from '../store/notesSlice';
 
 export const MoviePage = () => {
    const { id } = useParams<{ id: string }>();
@@ -20,15 +20,9 @@ export const MoviePage = () => {
       state.favorites.items.some((item) => item.imdbID === id)
    );
 
-   const savedNote = useAppSelector((state) => state.notes.items[id || ''] || '');
+   const savedNote = useAppSelector((state) => state.notes.items[id || ''] || []);
    const [noteText, setNoteText] = useState('');
-   const [isEditing, setIsEditing] = useState(false);
-
-   useEffect(() => {
-      setNoteText(savedNote);
-      setIsEditing(savedNote === '');
-   }, [savedNote]);
-
+   const [editIndex, setEditIndex] = useState<number | null>(null);
    const handleFavoriteToggle = () => {
       if (!movie) return;
 
@@ -46,22 +40,27 @@ export const MoviePage = () => {
    };
 
    const handleSaveNote = () => {
-      if (id) {
+      if (!id || !noteText.trim()) return;
+
+      if (editIndex !== null) {
+         dispatch(updateNote({ imdbID: id, index: editIndex, text: noteText }));
+         setEditIndex(null);
+      } else {
          dispatch(saveNote({ imdbID: id, text: noteText }));
-         setIsEditing(false);
       }
+
+      setNoteText('');
    };
 
-   const handleDeleteNote = () => {
+   const handleDeleteNote = (index: number) => {
       if (id && window.confirm('Are you sure you want to delete your note?')) {
-         dispatch(deleteNote(id));
-         setNoteText('');
+         dispatch(deleteNote({ imdbID: id, index }));
       }
    };
 
    const handleCancelEdit = () => {
-      setNoteText(savedNote);
-      setIsEditing(savedNote === '');
+      setNoteText('');
+      setEditIndex(null);
    };
 
    if (isLoading) {
@@ -141,42 +140,63 @@ export const MoviePage = () => {
          <div className={styles.notesSection}>
             <h3 className={styles.sectionTitle}>Personal Notes & Reviews</h3>
 
-            {isEditing ? (
-               <div className={styles.noteForm}>
-                  <textarea
-                     placeholder="Write your review or notes about this movie here..."
-                     className={styles.textarea}
-                     value={noteText}
-                     onChange={(e) => setNoteText(e.target.value)}
-                     maxLength={1000}
-                  />
-                  <div className={styles.btnRow}>
-                     <button
-                        className={styles.saveNoteBtn}
-                        onClick={handleSaveNote}
-                        disabled={!noteText.trim()}
-                     >
-                        <MdSave size={18} /> Save Note
+            <div className={styles.noteForm}>
+               <textarea
+                  placeholder={editIndex !== null ? "Edit your note..." : "Write a new review or note about this movie..."}
+                  className={styles.textarea}
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  maxLength={1000}
+               />
+               <div className={styles.btnRow}>
+                  <button
+                     className={styles.saveNoteBtn}
+                     onClick={handleSaveNote}
+                     disabled={!noteText.trim()}
+                  >
+                     {editIndex !== null ? 'Save Changes' : 'Add Note'}
+                  </button>
+                  {editIndex !== null && (
+                     <button className={styles.cancelBtn} onClick={handleCancelEdit}>
+                        Cancel
                      </button>
-                     {savedNote && (
-                        <button className={styles.cancelBtn} onClick={handleCancelEdit}>
-                           <MdCancel size={18} /> Cancel
-                        </button>
-                     )}
-                  </div>
+                  )}
+               </div>
+            </div>
+
+            {savedNote.length > 0 ? (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+                  {savedNote.map((note, index) => (
+                     <div key={index} className={styles.displayNoteBlock} style={{ opacity: editIndex === index ? 0.6 : 1 }}>
+                        <p className={styles.noteContent}>{note}</p>
+                        <div className={styles.noteActions}>
+                           <button
+                              className={styles.actionBtn}
+                              onClick={() => {
+                                 setNoteText(note);
+                                 setEditIndex(index);
+                              }}
+                              title="Edit note"
+                              disabled={editIndex !== null}
+                           >
+                              <MdEdit size={18} /> Edit
+                           </button>
+                           <button
+                              className={`${styles.actionBtn} ${styles.deleteBtnColor}`}
+                              onClick={() => handleDeleteNote(index)}
+                              title="Delete note"
+                              disabled={editIndex !== null}
+                           >
+                              <MdDelete size={18} /> Delete
+                           </button>
+                        </div>
+                     </div>
+                  ))}
                </div>
             ) : (
-               <div className={styles.displayNoteBlock}>
-                  <p className={styles.noteContent}>{savedNote}</p>
-                  <div className={styles.noteActions}>
-                     <button className={styles.actionBtn} onClick={() => setIsEditing(true)} title="Edit note">
-                        <MdEdit size={18} /> Edit
-                     </button>
-                     <button className={`${styles.actionBtn} ${styles.deleteBtnColor}`} onClick={handleDeleteNote} title="Delete note">
-                        <MdDelete size={18} /> Delete
-                     </button>
-                  </div>
-               </div>
+               <p style={{ color: '#888', fontStyle: 'italic', marginTop: '15px' }}>
+                  No notes added yet. Be the first to share your thoughts!
+               </p>
             )}
          </div>
       </div>
